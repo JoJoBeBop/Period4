@@ -16,9 +16,9 @@ class Tableitem extends Component {
                         <h3>{ this.props.table.title }</h3>
                         <p>{ this.props.table.description }</p>
                     </td>
-                    <td>
+{/*                    <td>
                         <a href={this.props.table.filename}>View</a>
-                    </td>
+                    </td>*/}
                 </tr>
 
 

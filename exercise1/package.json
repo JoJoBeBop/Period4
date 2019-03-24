@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "axios": "^0.18.0",
+    "prop-types": "^15.7.2",
     "react": "^16.8.4",
+    "react-axios": "^2.0.3",
     "react-dom": "^16.8.4",
     "react-scripts": "2.1.8"
   },
@@ -22,5 +25,6 @@
     "not ie <= 11",
     "not op_mini all"
   ],
-  "devDependencies": {}
+  "devDependencies": {},
+  "homepage": "."
 }
