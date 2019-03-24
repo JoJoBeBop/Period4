@@ -8,9 +8,9 @@ import PropTypes from "prop-types";
 class Table extends Component {
 
     render() {
-        console.log(this.props.picArray);
+        console.log(this.props.items);
 
-        return this.props.picArray.map ((table, i) => (
+        return this.props.items.map ((table, i) => (
             //            <h3> { table.title }</h3>
             <Tableitem key={i} table={table}/>
 

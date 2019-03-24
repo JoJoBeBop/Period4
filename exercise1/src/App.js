@@ -1,49 +1,57 @@
 import React, {Component} from 'react';
 import './App.css';
 import Table from "./components/Table"
+/*
 import axios from 'axios';
+*/
 
 
 class App extends Component {
 
     state = {
-        picArray: []
+        items: []
 
     };
 
-    state2 = {
-        picArray2: []
+    componentDidMount() {
 
-    };
+        const url = "http://media.mw.metropolia.fi/wbma/media/";
 
-        componentDidMount() {
-        axios.get("http://media.mw.metropolia.fi/wbma/media")
-            .then(response =>
-                this.setState({picArray:response.data}));
+        fetch("http://media.mw.metropolia.fi/wbma/media")
+            .then(res => res.json())
+            .then((array) => {
+                console.log(array);
 
-
-            const url = "http://media.mw.metropolia.fi/wbma/media/1697";
-            let arr = ["http://media.mw.metropolia.fi/wbma/media/"];
-
-
-            Promise.all(arr.map(item => {
-                return fetch(url ).
-                then(response => {
-
-                    return response.json();
+                Promise.all(array.map(item => {
+                    return fetch(url + item.file_id)
+                        .then(response => {
+                        return response.json();
+                    });
+                })).then(items => {
+                    this.setState({items:items});
+                    console.log(url + items.file_id);
                 });
-            })).then(items => {
-                this.setState({picArray2:items.data})
 
-                /*
-                                console.log(url + items.file_id);
-                */
-
-
-                // save items to state
             });
 
 
+        /*        const id = picArray.file_id;
+
+                const url = "http://media.mw.metropolia.fi/wbma/media/";
+
+
+                axios.get("http://media.mw.metropolia.fi/wbma/media/")
+                    .then(response =>
+                        this.setState({picArray:response.data}));
+
+                axios.get(url + id)
+                    .then(response =>
+                        this.setState({picArray:response.data}))
+
+
+        /!*
+                let arr = ["http://media.mw.metropolia.fi/wbma/media/"];
+        *!/*/
 
 
     }
@@ -53,7 +61,7 @@ class App extends Component {
             <div className="App">
                 <table>
 
-                    <Table picArray={this.state.picArray} picArray2={this.state2.picArray2}/>
+                    <Table items={this.state.items}/>
 
 
                 </table>

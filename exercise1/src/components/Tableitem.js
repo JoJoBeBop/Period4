@@ -7,7 +7,7 @@ class Tableitem extends Component {
             <tbody>
                 <tr>
                     <td>
-                        <img src={this.props.table.thumbnails.w160}/>
+                        <img src={this.props.table.thumbnails.w160} alt={"KUVA"}/>
                     </td>
                     <td>
 
