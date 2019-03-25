@@ -1,75 +1,39 @@
+// App.js
 import React, {Component} from 'react';
-import './App.css';
-import Table from "./components/Table"
-/*
-import axios from 'axios';
-*/
-
+import {BrowserRouter as Router, Route} from "react-router-dom";
+import {getAllMedia} from './utils/mediaAPI';
+import Nav from "./components/Nav";
+import Home from "./views/Home";
+import Profile from "./views/Profile";
+import Single from "./views/Single";
 
 class App extends Component {
 
     state = {
-        items: []
-
+        picArray: [],
     };
 
     componentDidMount() {
 
-
-        const url = "http://media.mw.metropolia.fi/wbma/media/";
-
-        fetch("http://media.mw.metropolia.fi/wbma/media")
-            .then(res => res.json())
-            .then((array) => {
-                console.log(array);
-
-                Promise.all(array.map(item => {
-                    return fetch("http://media.mw.metropolia.fi/wbma/media/" + item.file_id)
-                        .then(response => {
-                        return response.json();
-                    });
-                })).then(items => {
-                    this.setState({items:items});
-                    console.log(url + items.file_id);
-                });
-
-            });
-
-
-        /*        const id = picArray.file_id;
-
-                const url = "http://media.mw.metropolia.fi/wbma/media/";
-
-
-                axios.get("http://media.mw.metropolia.fi/wbma/media/")
-                    .then(response =>
-                        this.setState({picArray:response.data}));
-
-                axios.get(url + id)
-                    .then(response =>
-                        this.setState({picArray:response.data}))
-
-
-        /!*
-                let arr = ["http://media.mw.metropolia.fi/wbma/media/"];
-        *!/*/
-
-
+        getAllMedia().then(pics => {
+            this.setState({picArray: pics});
+        });
     }
 
     render() {
-
         return (
-            <div className="App">
-                <table>
+            <Router>
 
-                    <Table items={this.state.items} />
-
-
-                </table>
-
-
+            <div className="container">
+                <Nav />
+                <Route exact path={"/"} render={(props) => (
+                    <Home {...props} picArray={this.state.picArray}/>
+                )}/>
+                <Route path={"/profile"} component={Profile}/>
+                <Route path={"/single/:id"} component={Single}/>
             </div>
+
+            </Router>
         );
     }
 }
