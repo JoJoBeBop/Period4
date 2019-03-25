@@ -15,6 +15,7 @@ class App extends Component {
 
     componentDidMount() {
 
+
         const url = "http://media.mw.metropolia.fi/wbma/media/";
 
         fetch("http://media.mw.metropolia.fi/wbma/media")
@@ -23,7 +24,7 @@ class App extends Component {
                 console.log(array);
 
                 Promise.all(array.map(item => {
-                    return fetch(url + item.file_id)
+                    return fetch("http://media.mw.metropolia.fi/wbma/media/" + item.file_id)
                         .then(response => {
                         return response.json();
                     });
@@ -57,11 +58,12 @@ class App extends Component {
     }
 
     render() {
+
         return (
             <div className="App">
                 <table>
 
-                    <Table items={this.state.items}/>
+                    <Table items={this.state.items} />
 
 
                 </table>
