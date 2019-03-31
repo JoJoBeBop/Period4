@@ -6,6 +6,7 @@ import Nav from "./components/Nav";
 import Home from "./views/Home";
 import Profile from "./views/Profile";
 import Single from "./views/Single";
+import Login from "./views/Login";
 
 class App extends Component {
 
@@ -24,14 +25,16 @@ class App extends Component {
         return (
             <Router>
 
-            <div className="container">
-                <Nav />
-                <Route exact path={"/"} render={(props) => (
-                    <Home {...props} picArray={this.state.picArray}/>
-                )}/>
-                <Route path={"/profile"} component={Profile}/>
-                <Route path={"/single/:id"} component={Single}/>
-            </div>
+                <div className="container">
+                    <Nav />
+                    <Route exact path={"/"} render={(props) => (
+                        <Home {...props} picArray={this.state.picArray}/>
+                    )}/>
+                    <Route path={"/profile"} component={Profile}/>
+                    <Route path={"/single/:id"} component={Single}/>
+                    <Route path={"/Login"} component={Login}/>
+
+                </div>
 
             </Router>
         );

@@ -9,7 +9,7 @@ const Table = (props) => {
     return (
         <table>
             <tbody>
-                {rows}
+            {rows}
             </tbody>
         </table>
     );
