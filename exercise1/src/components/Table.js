@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Tr from './tr';
+import Tr from './Tr';
 
 const Table = (props) => {
     const rows = props.picArray.map((item, i) => {

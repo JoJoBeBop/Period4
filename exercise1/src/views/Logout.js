@@ -1,14 +1,26 @@
 import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 
-class  extends Component {
+class Logout extends Component {
+
+    componentDidMount() {
+        this.props.setUser(null);
+        localStorage.removeItem('token');
+        this.props.history.push('/');
+    }
+
     render() {
         return (
-            < div >
-            
-            < /div>
-    )
-        ;
+            <React.Fragment>
+                <h1>Logout</h1>
+            </React.Fragment>
+        );
     }
 }
 
-export default ;
+Logout.propTypes = {
+    setUser: PropTypes.func,
+    history: PropTypes.object,
+};
+
+export default Logout;
