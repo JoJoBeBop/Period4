@@ -1,11 +1,25 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-/*import {BrowserRouter as Router, Route} from 'react-router-dom';
-import {Link} from 'react-router-dom';*/
-import Button from '@material-ui/core/Button';
+import {login, register, getUser, checkUser} from '../util/MediaAPI';
+import {TextField, Button} from '@material-ui/core';
+import {Send} from '@material-ui/icons';
 import {ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
+import red from '@material-ui/core/colors/red';
 
-import {login, register, getUser, checkAvailability, getProfileImage, getSingleMedia} from '../util/MediaAPI';
+import {withStyles} from '@material-ui/core/styles';
+
+const styles = theme => ({
+    container: {
+        width: '50%',
+        padding: '1rem',
+    },
+    button: {
+        margin: theme.spacing.unit,
+    },
+    alert: {
+        color: red[500],
+    },
+});
 
 class Login extends Component {
     state = {
@@ -14,58 +28,46 @@ class Login extends Component {
             password: '',
             email: '',
             full_name: '',
+            repeatPassword: '',
         },
-        toggleForm: true,
-        userAvailable: true,
-        registerVisible: "hidden",
-        loginVisible: "visible",
-        password2: "",
+        message: '',
+        formToggler: true,
+        validUser: true,
     };
+
+    myRef = 'form';
 
     handleLoginSubmit = (evt) => {
         evt.preventDefault();
         this.doLogin();
     };
 
-    handleRegisterSubmit = (evt) => {
-
-        if (this.state.user.password === this.state.password2) {
-            evt.preventDefault();
-            register(this.state.user).then(user => {
-                console.log(user);
-                this.doLogin();
-            });
-        } else
-            alert("Passwords don't match")
-    };
-
-    doCheckAvailability = (evt) => {
-        const target = evt.target;
-        const value = target.value;
-
-        checkAvailability(value).then(response => {
-            console.log(response.available);
-            if (!response.available) {
-                alert("Username taken")
+    handleRegisterSubmit = () => {
+        const user = {...this.state.user};
+        // remove repeatPassword
+        delete user.repeatPassword;
+        register(user).then(user => {
+            console.log(user);
+            if (user.message !== undefined) {
+                this.setState({message: user.message});
+                return;
             }
-        })
+            this.doLogin();
+        });
     };
 
     doLogin = () => {
         login(this.state.user.username, this.state.user.password).then(response => {
             console.log(response);
-            this.props.setUser(response.user);
-            localStorage.setItem('token', response.token);
-            this.props.history.push('/home');
-
-            /*            if(!response.message) {
-                            this.props.setUser(response.user);
-                            localStorage.setItem('token', response.token);
-                            this.props.history.push('/home');
-                        } else {
-                            alert(response.message);
-                            console.log("PAKS")
-                        }*/
+            if (response.user !== undefined) {
+                this.props.setUser(response.user);
+                localStorage.setItem('token', response.token);
+                this.props.history.push('/home');
+            } else {
+                this.setState({message: response.message});
+            }
+        }).catch((err) => {
+            console.log(err);
         });
     };
 
@@ -76,217 +78,144 @@ class Login extends Component {
 
         console.log(value, name);
 
-        this.setState((prevState) => {
-            return {
-                user: {
-                    ...prevState.user,
-                    [name]: value,
-                },
-            };
+        this.setState((prevState) => ({
+            user: {
+                ...prevState.user,
+                [name]: value,
+
+            },
+        }));
+
+        if (name === 'username') {
+            this.checkUsername(target.value);
+        }
+    };
+
+    checkUsername = (username) => {
+        checkUser(username).then((result) => {
+            console.log(result.available);
+            this.setState({validUser: result.available});
         });
     };
 
-    handleInputChange2 = (evt) => {
-        const target = evt.target;
-        const value = target.value;
-        const name = target.name;
-
-        console.log(value, name);
-
-        this.setState({
-            password2: value
-
-        });
+    toggleForm = () => {
+        this.setState({formToggler: !this.state.formToggler});
     };
-
 
     componentDidMount() {
         console.log(localStorage.getItem('token'));
         if (localStorage.getItem('token') !== null) {
-            console.log(getSingleMedia(26));
             getUser(localStorage.getItem('token')).then(response => {
                 this.props.setUser(response);
                 this.props.history.push('/home');
             });
         }
+        // custom rule will have name 'isPasswordMatch'
+        ValidatorForm.addValidationRule('isPasswordMatch', (value) => {
+            return value === this.state.user.password;
+        });
+        ValidatorForm.addValidationRule('isUserAvailable', () => {
+            return this.state.validUser;
+        });
     }
 
-    /*Sets register/login styles to hidden or visible*/
-    /*Definitely didn't spend way too much time on this*/
-    registerClick = () => {
-        console.log(getProfileImage());
-        this.setState({
-            registerVisible: "visible",
-            loginVisible: "hidden"
-        })
-    };
-
-    registerClick2 = () => {
-        this.setState({
-            registerVisible: "hidden",
-            loginVisible: "visible"
-        })
-    };
-
     render() {
+        const {classes} = this.props;
         return (
-            <React.Fragment>
-                <div id="loginDiv" style={{visibility: this.state.loginVisible}}>
+            <div className={classes.container}>
+                <div>
+                    <Button color="primary" variant="contained"
+                            onClick={this.toggleForm}>{(this.state.formToggler && `No account yet?
+              Register.`) || `Login`}</Button>
+                </div>
+                {this.state.formToggler &&
+                <React.Fragment>
                     <h1>Login</h1>
+                    <form onSubmit={this.handleLoginSubmit}>
+                        <TextField fullWidth required name="username" id="username"
+                                   label="Username"
+                                   value={this.state.user.username}
+                                   onChange={this.handleInputChange}/>
+                        <TextField fullWidth required name="password" type="password"
+                                   id="password"
+                                   label="Password"
+                                   value={this.state.user.password}
+                                   onChange={this.handleInputChange}/>
+                        <Button className={classes.button} variant="contained"
+                                color="primary" type="submit">
+                            <Send/>&nbsp;Login
+                        </Button>
+                    </form>
+                </React.Fragment>
+                }
 
-                    <ValidatorForm ref="form" onSubmit={this.handleLoginSubmit}>
-                        <TextValidator
-                            type="text"
-                            name="username"
-                            placeholder="username"
-                            validators={['required', 'minStringLength:3']}
-                            errorMessages={['this field is required', 'Not long enough']}
-                            value={this.state.user.username}
-                            onChange={this.handleInputChange}
-                        />
-                        <br/>
-                        <TextValidator
-                            type="password"
-                            name="password"
-                            placeholder="password"
-                            validators={['required', 'minStringLength:5']}
-                            errorMessages={['This field is required', 'Not long enough']}
-                            value={this.state.user.password}
-                            onChange={this.handleInputChange}/>
-                        <br/>
-                        <Button type="submit">Login</Button>
-                    </ValidatorForm>
-
-                </div>
-
-                <button onClick={this.registerClick} style={{visibility: this.state.loginVisible}}>Not registered yet?
-                </button>
-
-                <div id="registerDiv" style={{visibility: this.state.registerVisible}}>
+                {!this.state.formToggler &&
+                <React.Fragment>
                     <h1>Register</h1>
-
-                    <ValidatorForm ref="form" onSubmit={this.handleRegisterSubmit}>
-                        <TextValidator
-                            type="text"
-                            name="username"
-                            placeholder="username"
-                            validators={['required', 'minStringLength:3']}
-                            errorMessages={['this field is required', 'Not long enough']}
-                            value={this.state.user.username}
-                            onBlur={this.doCheckAvailability}
-                            onChange={this.handleInputChange}/>
-                        <br/>
-                        <TextValidator
-                            type="password"
-                            name="password"
-                            placeholder="password"
-                            validators={['required', 'minStringLength:5']}
-                            errorMessages={['This field is required', 'Not long enough']}
-                            value={this.state.user.password}
-                            onChange={this.handleInputChange}/>
-                        <br/>
-                        <TextValidator
-                            type="password"
-                            name="password"
-                            placeholder="confirm password"
-                            validators={['required', 'minStringLength:5']}
-                            errorMessages={['This field is required', 'Not long enough']}
-                            value={this.state.password2}
-                            onChange={this.handleInputChange2}
-                        />
-                        <br/>
-                        <TextValidator
-                            type="email"
-                            name="email"
-                            placeholder="email"
-                            validators={['required', 'isEmail']}
-                            errorMessages={['This field is required', 'Email is not valid']}
-                            value={this.state.user.email}
-                            onChange={this.handleInputChange}/>
-                        <br/>
-                        {/*full name is optional but should be validated if entered?*/}
-                        <TextValidator
-                            type="text"
-                            name="full_name"
-                            placeholder="full name"
-                            value={this.state.user.full_name}
-                            onChange={this.handleInputChange}/>
-                        <br/>
-                        <Button type="submit">Login</Button>
+                    <ValidatorForm instantValidate={false} onSubmit={this.handleRegisterSubmit}
+                                   onError={errors => console.log(errors)}>
+                        <TextValidator fullWidth name="username" id="username"
+                                       label="Username"
+                                       value={this.state.user.username}
+                                       onChange={this.handleInputChange}
+                                       validators={[
+                                           'required',
+                                           'minStringLength:3',
+                                           'isUserAvailable']}
+                                       errorMessages={[
+                                           'this field is required',
+                                           'minimum 3 charaters',
+                                           'username not available']}/>
+                        <TextValidator fullWidth name="password" type="password"
+                                       id="password"
+                                       label="Password"
+                                       value={this.state.user.password}
+                                       onChange={this.handleInputChange}
+                                       validators={['required', 'minStringLength:5']}
+                                       errorMessages={[
+                                           'this field is required',
+                                           'minimum 5 characters']}/>
+                        <TextValidator fullWidth name="repeatPassword" type="password"
+                                       id="repeatPassword"
+                                       label="Repeat password"
+                                       value={this.state.user.repeatPassword}
+                                       onChange={this.handleInputChange}
+                                       validators={['isPasswordMatch', 'required']}
+                                       errorMessages={[
+                                           'password mismatch',
+                                           'this field is required']}/>
+                        <TextValidator fullWidth name="email"
+                                       id="email"
+                                       label="email"
+                                       value={this.state.user.email}
+                                       onChange={this.handleInputChange}
+                                       validators={['required', 'isEmail']}
+                                       errorMessages={[
+                                           'this field is required',
+                                           'email is not valid']}/>
+                        <TextField fullWidth name="full_name" id="full_name"
+                                   label="Full name"
+                                   value={this.state.user.full_name}
+                                   onChange={this.handleInputChange}/>
+                        <Button className={classes.button} variant="contained"
+                                color="primary" type="submit">
+                            <Send/>&nbsp;Register
+                        </Button>
                     </ValidatorForm>
-
-                    <button onClick={this.registerClick2} style={{visibility: this.state.registerVisible}}>Already have an account?
-                    </button>
-
-                </div>
-
-            </React.Fragment>
+                </React.Fragment>
+                }
+                <p className={classes.alert}>
+                    {this.state.message}
+                </p>
+            </div>
         );
     }
 }
 
-const registerStyle = {
-    visibility: "hidden",
-    float:"right"
-};
-
-const loginStyle = {
-    visibility: "visible",
-    float:"left"
-};
-
-/*    render() {
-        return (
-
-                <React.Fragment>
-                    <h1>Login</h1>
-                    <form onSubmit={this.handleLoginSubmit}>
-                        <input type="text" name="username" placeholder="username"
-                               value={this.state.user.username}
-                               onChange={this.handleInputChange}/>
-                        <br/>
-                        <input type="password" name="password" placeholder="password"
-                               value={this.state.user.password}
-                               onChange={this.handleInputChange}/>
-                        <br/>
-                        <button type="submit">Login</button>
-                    </form>
-
-                    <button>
-                        <Link to="/register">Not yet registered?</Link>
-                    </button>
-
-
-
-                    <h1>Register</h1>
-                    <form onSubmit={this.handleRegisterSubmit}>
-                        <input type="text" name="username" placeholder="username"
-                               value={this.state.user.username}
-                               onChange={this.handleInputChange} />
-                        <br/>
-                        <input type="password" name="password" placeholder="password"
-                               value={this.state.user.password}
-                               onChange={this.handleInputChange}/>
-                        <br/>
-                        <input type="email" name="email" placeholder="email"
-                               value={this.state.user.email}
-                               onChange={this.handleInputChange}/>
-                        <br/>
-                        <input type="text" name="full_name" placeholder="full name"
-                               value={this.state.user.full_name}
-                               onChange={this.handleInputChange}/>
-                        <br/>
-                        <button type="submit">Login</button>
-                    </form>
-                </React.Fragment>
-
-        );
-    }
-}*/
-
 Login.propTypes = {
     setUser: PropTypes.func,
     history: PropTypes.object,
+    classes: PropTypes.object,
 };
 
-export default Login;
+export default withStyles(styles)(Login);

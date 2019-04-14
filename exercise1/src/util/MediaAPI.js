@@ -1,5 +1,4 @@
 const apiUrl = 'http://media.mw.metropolia.fi/wbma/';
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMTksInVzZXJuYW1lIjoiYXNkIiwiZW1haWwiOiJhc2QiLCJmdWxsX25hbWUiOm51bGwsImlzX2FkbWluIjpudWxsLCJ0aW1lX2NyZWF0ZWQiOiIyMDE5LTAxLTI0VDEwOjIzOjI4LjAwMFoiLCJpYXQiOjE1NTQyMDAzNzgsImV4cCI6MTU1NjI3Mzk3OH0.19J5MmR_x4AIiemncpe1jY0D1qA3W3JOVg6nBPitTFg;"
 
 const getAllMedia = () => {
   return fetch(apiUrl + 'media/').then(response => {
@@ -19,17 +18,8 @@ const getAllMedia = () => {
 
 const getSingleMedia = (id) => {
   return fetch(apiUrl + 'media/' + id).then(response => {
-    console.log(response);
-
     return response.json();
   });
-};
-
-
-const getProfilePic = (tag) => {
-    return fetch(apiUrl + 'tags/').then(response => {
-        return response.json();
-    });
 };
 
 const login = (username, password) => {
@@ -62,29 +52,40 @@ const getUser = (token) => {
   const settings = {
     headers: {
       'x-access-token': token,
-    }
+    },
   };
   return fetch(apiUrl + 'users/user', settings).then(response => {
-    console.log(JSON.stringify(response));
     return response.json();
   });
 };
 
-const getProfileImage = (token) => {
-  const settings = {
-    headers: {
-      'x-access-token': token,
-    }
-  };
-  return fetch(apiUrl + 'tags/:profile', settings).then(response => {
-    return response.json();
-  });
-};
-
-const checkAvailability = (username) => {
+const checkUser = (username) => {
   return fetch(apiUrl + 'users/username/' + username).then(response => {
     return response.json();
   });
 };
 
-export {getAllMedia, getSingleMedia, login, register, getUser, checkAvailability, getProfileImage};
+const getFilesByTag = (tag) => {
+  return fetch(apiUrl + 'tags/' + tag).then(response => {
+    return response.json();
+  });
+};
+
+const filters = {
+  brightness: 100,
+  contrast: 100,
+  warmth: 0,
+  saturation: 100,
+};
+
+
+const handleRangeChange = (element) => {
+
+  const image = element.target.files[0];
+
+  console.log(element.value);
+  filters[element.id] = element.value;
+  image.style.filter = `brightness(${filters.brightness}%) contrast(${filters.contrast}%) sepia(${filters.warmth}%) saturate(${filters.saturation}%)`;
+};
+
+export {getAllMedia, getSingleMedia, login, register, getUser, getFilesByTag, checkUser, handleRangeChange};

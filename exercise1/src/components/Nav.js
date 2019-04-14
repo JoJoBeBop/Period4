@@ -2,8 +2,7 @@ import React from 'react';
 import {Link} from 'react-router-dom';
 import PropTypes from 'prop-types';
 import {List, ListItem, ListItemIcon, ListItemText} from '@material-ui/core';
-import {Home, ExitToApp, PermIdentity} from '@material-ui/icons';
-
+import {Home, AccountBox, ExitToApp, AddCircle} from '@material-ui/icons';
 
 const Nav = (props) => {
     return (
@@ -13,22 +12,29 @@ const Nav = (props) => {
                     <ListItemIcon>
                         <Home/>
                     </ListItemIcon>
-                    <ListItemText primary="Home" />
+                    <ListItemText primary="Home"/>
                 </ListItem>
-
                 {props.checkLogin() &&
                 <React.Fragment>
+
+                    <ListItem button component={Link} to="/upload">
+                        <ListItemIcon>
+                            <AddCircle/>
+                        </ListItemIcon>
+                        <ListItemText primary="Upload"/>
+                    </ListItem>
+
                     <ListItem button component={Link} to="/profile">
                         <ListItemIcon>
-                            <PermIdentity/>
+                            <AccountBox/>
                         </ListItemIcon>
-                        <ListItemText primary="profile" />
+                        <ListItemText primary="Profile"/>
                     </ListItem>
                     <ListItem button component={Link} to="/logout">
                         <ListItemIcon>
                             <ExitToApp/>
                         </ListItemIcon>
-                        <ListItemText primary="logout" />
+                        <ListItemText primary="Logout"/>
                     </ListItem>
                 </React.Fragment>
                 }
@@ -37,7 +43,7 @@ const Nav = (props) => {
                     <ListItemIcon>
                         <ExitToApp/>
                     </ListItemIcon>
-                    <ListItemText primary="Login" />
+                    <ListItemText primary="Login"/>
                 </ListItem>
                 }
 
