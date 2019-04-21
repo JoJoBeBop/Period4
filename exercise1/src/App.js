@@ -8,7 +8,8 @@ import Login from './views/Login';
 import Profile from './views/Profile';
 import Logout from './views/Logout';
 import Grid from '@material-ui/core/Grid';
-import Upload from "./views/Upload";
+import Upload from './views/Upload';
+import MyFiles from './views/MyFiles';
 
 class App extends Component {
 
@@ -47,40 +48,38 @@ class App extends Component {
         return this.state.user !== null;
     };
 
-    getMedia = () => {
+    updateImages = () => {
         getAllMedia().then((pics) => {
             console.log(pics);
             this.setState({picArray: pics});
-        });
+        }).catch(err => {
+            console.log(err)
+        })
     };
 
-
     componentDidMount() {
-        this.getMedia();
-
-        /*    this.getMedia()
-            if (this.state.user === null) {
-
-            }*/
+        this.updateImages();
     }
 
     render() {
         return (
-            <Router basename='/~ilkkamtk/mpjakk-react'>
+            <Router basename='/~jorib/public_html'>
                 <Grid container>
-                    <Grid item sm={2}>
+                    <Grid item md={2}>
                         <Nav checkLogin={this.checkLogin}/>
                     </Grid>
-                    <Grid item sm={10}>
+                    <Grid item md={10}>
                         <Route path="/home" render={(props) => (
                             <Front {...props} picArray={this.state.picArray}/>
                         )}/>
 
-                        <Route path="/single" component={Single}/>
-
                         <Route path="/upload" render={(props) => (
-                            <Upload {...props} getMedia={this.getMedia}/>
+                            <Upload {...props} updateImages={this.updateImages}/>
                         )}/>
+
+                        <Route path="/single/:id" component={Single}/>
+
+                        <Route path="/my-files" component={MyFiles}/>
 
                         <Route path="/profile" render={(props) => (
                             <Profile {...props} user={this.state.user}/>
